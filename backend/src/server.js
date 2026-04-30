@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import { fileURLToPath } from "url";
 import cors from "cors";
 import { serve } from "inngest/express";
 import { clerkMiddleware } from "@clerk/express";
@@ -15,7 +16,8 @@ import assistantRoutes from "./routes/assistantRoutes.js";
 
 const app = express();
 
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // middleware
 app.use(express.json());
@@ -39,13 +41,14 @@ app.get("/health", (req, res) => {
 
 // make our app ready for deployment
 if (ENV.NODE_ENV === "production") {
-  // On Render, the process typically runs from the repo root.
-  // `frontend/dist` will exist after `npm run build --prefix frontend`.
-  app.use(express.static(path.join(__dirname, "frontend", "dist")));
+  // Serve the Vite build output regardless of process working directory.
+  // backend/src/server.js -> ../../frontend/dist
+  const distPath = path.resolve(__dirname, "..", "..", "frontend", "dist");
+  app.use(express.static(distPath));
 
   // SPA fallback
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
+    res.sendFile(path.join(distPath, "index.html"));
   });
 }
 
