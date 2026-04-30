@@ -107,7 +107,11 @@ export async function getSessionById(req, res) {
 
     if (!session) return res.status(404).json({ message: "Session not found" });
 
-    res.status(200).json({ session });
+    const isHost =
+      session.host?._id?.toString?.() === req.user?._id?.toString?.() ||
+      (session.host?.clerkId && session.host.clerkId === req.user?.clerkId);
+
+    res.status(200).json({ session, isHost });
   } catch (error) {
     console.log("Error in getSessionById controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
