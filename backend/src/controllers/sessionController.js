@@ -11,6 +11,13 @@ export async function createSession(req, res) {
       return res.status(400).json({ message: "Problem and difficulty are required" });
     }
 
+    // Ensure the Stream user exists even if Inngest sync hasn't run yet.
+    await chatClient.upsertUser({
+      id: clerkId,
+      name: req.user.name || req.user.email || clerkId,
+      image: req.user.profileImage || "",
+    });
+
     // generate a unique call id for stream video
     const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
@@ -116,6 +123,13 @@ export async function joinSession(req, res) {
 
     // check if session is already full - has a participant
     if (session.participant) return res.status(409).json({ message: "Session is full" });
+
+    // Ensure joining user exists on Stream.
+    await chatClient.upsertUser({
+      id: clerkId,
+      name: req.user.name || req.user.email || clerkId,
+      image: req.user.profileImage || "",
+    });
 
     session.participant = userId;
     await session.save();
