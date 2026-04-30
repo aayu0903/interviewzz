@@ -36,8 +36,12 @@ export async function createSession(req, res) {
 
     res.status(201).json({ session });
   } catch (error) {
-    console.log("Error in createSession controller:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Error in createSession controller:", error);
+    res.status(502).json({
+      message:
+        error?.message ||
+        "Failed to create session room (Stream Video/Chat). Check STREAM_API_KEY/STREAM_API_SECRET and Stream dashboard permissions.",
+    });
   }
 }
 

@@ -6,7 +6,12 @@ const apiKey = ENV.STREAM_API_KEY;
 const apiSecret = ENV.STREAM_API_SECRET;
 
 if (!apiKey || !apiSecret) {
-  console.error("STREAM_API_KEY or STREAM_API_SECRET is missing");
+  const msg = "STREAM_API_KEY or STREAM_API_SECRET is missing";
+  // In production this should be a hard failure (sessions/chat can't work).
+  if (ENV.NODE_ENV === "production") {
+    throw new Error(msg);
+  }
+  console.error(msg);
 }
 
 export const chatClient = StreamChat.getInstance(apiKey, apiSecret); // will be used chat features
