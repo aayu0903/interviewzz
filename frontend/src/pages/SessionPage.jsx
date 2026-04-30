@@ -28,7 +28,11 @@ function SessionPage() {
   const endSessionMutation = useEndSession();
 
   const session = sessionData?.session;
-  const isHost = session?.host?.clerkId === user?.id;
+  const normalizedUserEmail = user?.primaryEmailAddress?.emailAddress?.toLowerCase?.() || "";
+  const normalizedHostEmail = session?.host?.email?.toLowerCase?.() || "";
+  const isHost =
+    session?.host?.clerkId === user?.id ||
+    (normalizedUserEmail && normalizedHostEmail && normalizedUserEmail === normalizedHostEmail);
   const isParticipant = session?.participant?.clerkId === user?.id;
 
   const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
