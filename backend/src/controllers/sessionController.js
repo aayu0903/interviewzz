@@ -1,6 +1,16 @@
 import { chatClient, streamClient } from "../lib/stream.js";
 import Session from "../models/Session.js";
 
+function getErrorMessage(error) {
+  return (
+    error?.response?.data?.message ||
+    error?.response?.data?.error ||
+    error?.response?.statusText ||
+    error?.message ||
+    "Unknown error"
+  );
+}
+
 export async function createSession(req, res) {
   try {
     const { problem, difficulty } = req.body;
@@ -46,8 +56,9 @@ export async function createSession(req, res) {
     console.error("Error in createSession controller:", error);
     res.status(502).json({
       message:
-        error?.message ||
+        getErrorMessage(error) ||
         "Failed to create session room (Stream Video/Chat). Check STREAM_API_KEY/STREAM_API_SECRET and Stream dashboard permissions.",
+      upstreamStatus: error?.response?.status || null,
     });
   }
 }
@@ -139,8 +150,11 @@ export async function joinSession(req, res) {
 
     res.status(200).json({ session });
   } catch (error) {
-    console.log("Error in joinSession controller:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Error in joinSession controller:", error);
+    res.status(502).json({
+      message: getErrorMessage(error) || "Failed to join session room",
+      upstreamStatus: error?.response?.status || null,
+    });
   }
 }
 
