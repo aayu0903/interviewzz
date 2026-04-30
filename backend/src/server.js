@@ -47,8 +47,10 @@ if (ENV.NODE_ENV === "production") {
   app.use(express.static(distPath));
 
   // SPA fallback
-  // Express 5 + path-to-regexp doesn't accept "*" as a path pattern
-  app.get("/*", (req, res) => {
+  // Express 5 + path-to-regexp is strict about wildcard route patterns.
+  // Use a final middleware instead of a wildcard route.
+  app.use((req, res, next) => {
+    if (req.method !== "GET") return next();
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
